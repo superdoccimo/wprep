@@ -117,10 +117,10 @@ Contributions are welcome! Please follow these steps:
 ## Detailed Explanation
 
 **English**  
-[https://betelgeuse.work/archives/8193](https://betelgeuse.work/archives/8193)
+[https://betelgeuse.work/archives/8282](https://betelgeuse.work/archives/8282)
 
 **Japanese**  
-[https://minokamo.tokyo/2024/09/19/7956/](https://minokamo.tokyo/2024/09/19/7956/)
+[https://minokamo.tokyo/2024/09/28/8016/](https://minokamo.tokyo/2024/09/28/8016/)
 
 ## Videos
 
@@ -142,5 +142,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 If you have any questions or feedback, please open an issue on the GitHub repository.
-
-# wprep

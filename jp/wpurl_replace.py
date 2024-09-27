@@ -7,12 +7,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import phpserialize
 
-# Load environment variables from the .env file
+# .envファイルから環境変数を読み込む
 load_dotenv()
 
-# Log file settings
+# ログファイルの設定
 logging.basicConfig(
-    level=logging.DEBUG,  # Set log level to DEBUG
+    level=logging.DEBUG,  # ログレベルをDEBUGに設定
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('wpurl_replace.log', encoding='utf-8'),
@@ -20,26 +20,26 @@ logging.basicConfig(
     ]
 )
 
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description='WordPress URL replacement script')
-parser.add_argument('--dry-run', action='store_true', help='Perform a dry run without making actual replacements')
-parser.add_argument('--old-url', required=True, help='The URL to be replaced')
-parser.add_argument('--new-url', required=True, help='The new URL to replace the old one')
+# コマンドライン引数の解析
+parser = argparse.ArgumentParser(description='WordPress URL置換スクリプト')
+parser.add_argument('--dry-run', action='store_true', help='実際の置換を行わずに確認だけ行う')
+parser.add_argument('--old-url', required=True, help='置換元URL')
+parser.add_argument('--new-url', required=True, help='置換先URL')
 args = parser.parse_args()
-logging.debug(f"Command-line arguments: {args}")
+logging.debug(f"コマンドライン引数: {args}")
 
-# Database connection settings
+# データベース接続設定
 db_config = {
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
     'host': os.getenv('DB_HOST'),
     'database': os.getenv('DB_NAME'),
 }
-logging.debug(f"Database settings: {db_config}")
+logging.debug(f"データベース設定: {db_config}")
 
-# Function definitions (all included, no omissions)
+# 以降の関数定義（省略せずにすべて記載）
 
-# Function to retrieve the primary key for each table
+# テーブルごとの主キーを取得する関数
 def get_primary_key(table_name):
     primary_keys = {
         'wp_options': 'option_id',
@@ -54,38 +54,38 @@ def get_primary_key(table_name):
         'wp_terms': 'term_id',
         'wp_usermeta': 'umeta_id',
     }
-    return primary_keys.get(table_name, 'id')  # Default is 'id'
+    return primary_keys.get(table_name, 'id')  # デフォルトは'id'
 
-# Function to establish a database connection
+# データベース接続を確立する関数
 def connect_to_database():
     try:
         conn = mysql.connector.connect(**db_config, autocommit=True)
-        logging.debug("Connected to the database")
+        logging.debug("データベースに接続しました")
         return conn
     except mysql.connector.Error as err:
-        logging.error(f"Database connection error: {err}")
+        logging.error(f"データベース接続エラー: {err}")
         raise
 
-# Function to retrieve all tables
+# 全テーブルを取得する関数
 def get_all_tables(cursor):
     cursor.execute("SHOW TABLES")
     return [table[0] for table in cursor.fetchall()]
 
-# Function to retrieve all columns for a specific table
+# 特定のテーブルの全カラムを取得する関数
 def get_columns(cursor, table_name):
     cursor.execute(f"SHOW COLUMNS FROM `{table_name}`")
     return cursor.fetchall()
 
-# Function to check if a column contains serialized data
+# カラムがシリアライズされているかどうかを確認する関数
 def is_column_serialized(table_name, column_name):
     serialized_columns = {
         'wp_options': ['option_value'],
         'wp_postmeta': ['meta_value'],
-        # Add other tables and columns containing serialized data
+        # 他のシリアライズされたデータを含むテーブルとカラムを追加
     }
     return table_name in serialized_columns and column_name in serialized_columns[table_name]
 
-# Function to replace URLs in serialized data and re-serialize it
+# シリアライズされたデータのURLを置換し、再シリアライズする関数
 def unserialize_replace_serialize(data, old_url, new_url):
     try:
         unserialized = phpserialize.loads(data.encode())
@@ -98,12 +98,12 @@ def unserialize_replace_serialize(data, old_url, new_url):
     except Exception:
         return data.replace(old_url, new_url)
 
-# Function to replace URLs in specific columns of a table
+# テーブル内の特定カラムに対してURLを置換する関数
 def replace_url_in_table(table_name, column_name, old_url, new_url, dry_run):
-    conn = connect_to_database()  # Connect to the database per thread
+    conn = connect_to_database()  # スレッドごとにデータベース接続
     cursor = conn.cursor()
     try:
-        primary_key = get_primary_key(table_name)  # Retrieve primary key
+        primary_key = get_primary_key(table_name)  # 主キーを取得
         if is_column_serialized(table_name, column_name):
             if dry_run:
                 logging.info(f"Would replace serialized data in {table_name}.{column_name}")
@@ -112,7 +112,7 @@ def replace_url_in_table(table_name, column_name, old_url, new_url, dry_run):
                 sql = f"SELECT {primary_key}, `{column_name}` FROM `{table_name}` WHERE `{column_name}` LIKE %s"
                 cursor.execute(sql, (f'%{old_url}%',))
                 rows = cursor.fetchall()
-                logging.debug(f"Found {len(rows)} rows in {table_name}.{column_name}")
+                logging.debug(f"{table_name}.{column_name} で {len(rows)} 行が見つかりました")
                 update_count = 0
                 for row in rows:
                     id, data = row
@@ -149,22 +149,22 @@ def replace_url_in_table(table_name, column_name, old_url, new_url, dry_run):
 
 def main():
     try:
-        logging.debug("Starting the main function")
+        logging.debug("main関数を開始します")
         conn = connect_to_database()
         cursor = conn.cursor()
 
         tables = get_all_tables(cursor)
-        logging.debug(f"Retrieved tables: {tables}")
+        logging.debug(f"取得したテーブル: {tables}")
         total_updates = 0
 
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = []
             for table_name in tables:
                 columns = get_columns(cursor, table_name)
-                logging.debug(f"Columns in table {table_name}: {columns}")
+                logging.debug(f"テーブル {table_name} のカラム: {columns}")
                 for (column_name, column_type, _, _, _, _) in columns:
                     if 'char' in column_type or 'text' in column_type or 'varchar' in column_type:
-                        logging.debug(f"Processing {table_name}.{column_name}")
+                        logging.debug(f"{table_name}.{column_name} の処理を開始します")
                         future = executor.submit(
                             replace_url_in_table,
                             table_name,
@@ -188,15 +188,15 @@ def main():
         if args.dry_run:
             print("Dry run completed. No changes were made.")
         else:
-            print("URL replacement completed.")
+            print("URL置換が完了しました。")
 
     except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}", exc_info=True)
+        logging.error(f"予期せぬエラーが発生しました: {e}", exc_info=True)
     finally:
         if 'conn' in locals() and conn.is_connected():
             cursor.close()
             conn.close()
-            logging.debug("Closed the database connection")
+            logging.debug("データベース接続を閉じました")
 
 if __name__ == "__main__":
     main()
