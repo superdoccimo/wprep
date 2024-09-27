@@ -125,10 +125,10 @@ Contributions are welcome! Please follow these steps:
 ## Videos
 
 **English**  
-[https://youtu.be/Rd1NwwLfyn8](https://youtu.be/Rd1NwwLfyn8)
+[https://youtu.be/56baX_Whimg](https://youtu.be/56baX_Whimg)
 
 **Japanese**  
-[https://youtu.be/MjQ9jPClsaY](https://youtu.be/MjQ9jPClsaY)
+[https://youtu.be/rEMOA5oZcOc](https://youtu.be/rEMOA5oZcOc)
 
 ## License
 
