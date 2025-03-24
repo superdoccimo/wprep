@@ -117,7 +117,7 @@ Contributions are welcome! Please follow these steps:
 ## Detailed Explanation
 
 **English**  
-[https://betelgeuse.work/replacing-wordpuress-url-script/](https://betelgeuse.work/replacing-wordpuress-url-script/)
+[https://betelgeuse.work/domain-changes-wp-cli/](https://betelgeuse.work/domain-changes-wp-cli/)
 
 **Japanese**  
 [https://minokamo.tokyo/2024/09/28/8016/](https://minokamo.tokyo/2024/09/28/8016/)
